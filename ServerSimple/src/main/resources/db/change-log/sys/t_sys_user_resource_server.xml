@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="mitong" id="202009071655-create-user-resource-server">
+        <createTable tableName="t_sys_user_resource_server" remarks="用户服务表">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime(3)" remarks="创建时间" defaultValueComputed="NOW(3)"/>
+            <column name="last_modified_date" type="datetime(3)" remarks="最后更新时间" defaultValueComputed="NOW(3)"/>
+            <column name="resource_server_id" type="BIGINT" remarks="资源服务id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT" remarks="用户id">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

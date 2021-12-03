@@ -1,0 +1,17 @@
+version: "3"
+services:
+  mysql:
+    container_name: mysql # 容器名
+    image: mysql:5.7.31 # 容器所使用的镜像，镜像形式为[username 或 url]/repository:tag，该镜像为公司搭设的docker仓库内的镜像
+    ports:
+      - "3306:3306" # [本机端口:容器内端口] 将本机端口与docker容器内部应用的端口映射，以提供外部对容器内应用的访问能力
+    environment:
+      MYSQL_ROOT_PASSWORD: root # 设置mysql密码
+    volumes:
+      - ./volumes/mysql_data:/var/lib/mysql # 将mysql中的数据文件映射到本机文件夹，":"前的为本机地址，后的为容器内地址
+      - ./mysql/mysql_db.cnf:/etc/mysql/conf.d/mysql_db.cnf # 将mysql的配置文件映射到本机文件
+  redis:
+    container_name: redis
+    image: redis:5.0.12
+    ports:
+      - "6379:6379"

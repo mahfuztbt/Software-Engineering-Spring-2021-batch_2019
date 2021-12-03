@@ -1,0 +1,27 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="mitong" id="202105161135-create-permission-table">
+        <createTable tableName="t_sys_permission" remarks="系统权限表">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime(3)" remarks="创建时间" defaultValueComputed="NOW(3)"/>
+            <column name="last_modified_date" type="datetime(3)" remarks="最后更新时间" defaultValueComputed="NOW(3)"/>
+            <column name="level" type="TINYINT" remarks="权限层级, 0: 全局 1: 组织" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="origin" type="TINYINT" remarks="权限来源, 0: 本系统 >0 资源服务id" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(255)" remarks="权限描述"/>
+            <column name="identity" type="VARCHAR(50)" remarks="权限标识">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(40)" remarks="权限名称">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

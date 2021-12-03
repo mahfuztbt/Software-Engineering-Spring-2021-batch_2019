@@ -1,0 +1,50 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="mitong" id="202105161135-create-user-table">
+        <createTable tableName="t_sys_user" remarks="系统用户表">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="created_date" type="datetime(3)" remarks="创建时间" defaultValueComputed="NOW(3)"/>
+            <column name="last_modified_date" type="datetime(3)" remarks="最后更新时间" defaultValueComputed="NOW(3)"/>
+            <column name="email" type="VARCHAR(80)" remarks="邮箱"/>
+            <column name="enabled" type="BIT(1)" remarks="账户可用"  defaultValueBoolean="true"/>
+            <column name="organization_id" type="BIGINT" remarks="组织id">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_name" type="VARCHAR(255)" remarks="组织名称"/>
+            <column name="sort" type="TINYINT" remarks="排序"/>
+            <column name="password" type="VARCHAR(128)" remarks="密码">
+                <constraints nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(63)" remarks="登录名">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)" remarks="用户名">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(40)" remarks="称谓"/>
+            <column name="tags" type="VARCHAR(50)" remarks="表情"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="20200215-add-user-status-info" author="mitong">
+        <addColumn tableName="t_sys_user">
+            <column name="credentials_non_expired" type="BIT(1)" remarks="凭据未过期" defaultValue="true"/>
+            <column name="account_non_locked" type="BIT(1)" remarks="账户未锁定" defaultValue="true"/>
+            <column name="account_non_expired" type="BIT(1)" remarks="账户未过期" defaultValue="true"/>
+            <column name="credentials_expired_date" remarks="凭据过期时间" type="DATETIME"/>
+            <column name="account_expired_date" remarks="账户过期时间" type="DATETIME"/>
+        </addColumn>
+        <createIndex tableName="t_sys_user" indexName="i_us_name">
+            <column name="username"/>
+        </createIndex>
+        <createIndex tableName="t_sys_user" indexName="i_us_orgId">
+            <column name="organization_id"/>
+        </createIndex>
+        <createIndex tableName="t_sys_user" indexName="i_us_enabled">
+            <column name="enabled"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

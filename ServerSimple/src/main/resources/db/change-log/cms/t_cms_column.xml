@@ -1,0 +1,18 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="mitong" id="202006071004-create-cms-column">
+        <createTable tableName="t_cms_column" remarks="栏目">
+            <column name="id" type="BIGINT" remarks="栏目主键" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(50)" remarks="栏目名称"/>
+            <column name="status" type="TINYINT" remarks="栏目状态"/>
+            <column name="parent_id" type="BIGINT" remarks="上级栏目Id"/>
+            <column name="type" type="TINYINT" remarks="栏目类型, 简单应用中无需区分栏目类型 "/>
+            <column name="created_date" type="datetime(3)" remarks="创建时间"/>
+            <column name="last_modified_date" type="datetime(3)" remarks="最后更新时间"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

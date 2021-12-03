@@ -1,0 +1,174 @@
+# 服务器
+server:
+  # 应用启动时的端口号
+  port: 9853
+  servlet:
+    context-path: ''
+  error:
+    include-message: always
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+#spring
+spring:
+  application:
+    name: "行业应用-基础信息平台"
+  #messages:
+  #  basename: i18n/messages
+  # 开发支持
+  devtools:
+    restart:
+      enabled: false
+
+  # 监控
+  boot:
+#    admin:
+#      client:
+#        #url: "http://localhost:9091"
+#        url: http://127.0.0.1:${server.port}${spring.boot.admin.context-path}
+#        username: ${spring.security.user.name}
+#        password: ${spring.security.user.password}
+#        instance:
+#          metadata:
+#            user.name: ${spring.security.user.name}
+#            user.password: ${spring.security.user.password}
+#          service-url: http://127.0.0.1:${server.port}
+#        period: 1m
+#      context-path: '/it-manage'
+#      monitor:
+#        status-lifetime: 1m
+#        info-interval: 5m
+#        info-lifetime: 5m
+  # 安全
+  security:
+    user:
+      name: admin
+      password: admin
+
+  # 数据相关 #
+  # jpa
+  jpa:
+    #database: sql_server
+    show-sql: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        enable_lazy_load_no_trans: true
+
+  liquibase:
+    enabled: false
+    change-log: classpath:db/change-log/change-master.xml
+
+  redis:
+    #password: ${REDIS_PASSOWRD:password}
+  cache:
+    type: redis
+    #simple
+
+  # web配置 #
+  data:
+    web:
+      pageable:
+        default-page-size: 15
+        max-page-size: 1000
+        one-indexed-parameters: true
+        size-parameter: pageSize
+  servlet:
+    multipart:
+      # 能接收的最大文件大小
+      max-file-size: 1024MB
+      # 能接收的最大请求大小
+      max-request-size: 2048MB
+  # 计划任务 #
+#  quartz:
+#    job-store-type: "memory"
+#    jdbc:
+#      initialize-schema: "never"
+
+  # 串行化
+  jackson:
+    # 返回和接收的json中Date格式化的形式
+    date-format: yyyy-MM-dd HH:mm:ss
+    # 当属性为null时是否返回, 可选 non_null
+    default-property-inclusion: always
+    # 默认时区为东八区
+    time-zone: GMT+8
+    mapper:
+      # 允许对传入的JSON进行更宽容的反序列化的功能。
+      accept_case_insensitive_properties: true
+    deserialization:
+      # 当存在java对象中没有的属性时，反序列化是否会失败
+      fail-on-unknown-properties: false
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+#
+# 日志
+logging:
+  level:
+    com.mitonal.edu: debug
+  config: classpath:logging-config.xml
+  file:
+    name: ${logging.file.path}/${spring.application.name}.log
+    path: logs
+
+# 服务器管理配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  auditevents:
+    enabled: true
+  endpoint:
+    health:
+      show-details: always
+  health:
+    mail:
+      enabled: false
+
+#注解
+decorator:
+#  datasource:
+#    p6spy:
+#      logging: slf4j
+#      multiline: true
+
+#备注文档
+#springfox:
+#  documentation:
+#    swagger:
+#      v2:
+#        host: 127.0.0.1:${server.port}${server.servlet.context-path}
+#    swagger-ui:
+#      enabled: true
+
+
+# 应用程序
+business:
+# 自定义配置
+spin:
+  security:
+    share-login: true
+    ignore-token-urls:
+      - path: /sys/api/v1/auth-token
+        method: POST
+      - path: /archives/api/v1/archives/oa
+        method: POST
+    sessionManage: false
+    secret-key: ${SECURITY_KEY:6254MRc;^x6[}dZZkl>E<S3owENQIiD1$y4_bTK24^-}
+    client-timeout:
+      app: 31536000000
+      BROWSER: 11536000000
+      DESK: 11536000000
+  swagger:
+    enable: true
+  convert:
+    office:
+      conveterClass: 'AsposeConvert'
+      description: 'office转换器'
+

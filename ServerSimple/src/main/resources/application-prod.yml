@@ -1,0 +1,24 @@
+spring:
+  liquibase:
+    enabled: false
+  cache:
+    type: simple
+  datasource:
+    url: jdbc:mysql://localhost:3306/appBase?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8
+    username: appBase
+    password: appBase
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: when_authorized
+
+spin:
+  swagger:
+    enable: true

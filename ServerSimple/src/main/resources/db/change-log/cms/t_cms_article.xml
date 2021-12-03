@@ -1,0 +1,20 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="mitong" id="202006102149-create-cms-article">
+        <createTable tableName="t_cms_article" remarks="文章">
+            <column name="id" type="BIGINT" remarks="文章主键" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="publish_date" type="datetime(3)" remarks="发布时间" defaultValueComputed="NOW(3)"/>
+            <column name="created_date" type="datetime(3)" remarks="创建时间" defaultValueComputed="NOW(3)"/>
+            <column name="last_modified_date" type="datetime(3)" remarks="最后更新时间" defaultValueComputed="NOW(3)"/>
+            <column name="title" type="VARCHAR(100)" remarks="文章标题"/>
+            <column name="head_image" type="VARCHAR(200)" remarks="头图"/>
+            <column name="status" type="TINYINT" remarks="栏目状态"/>
+            <column name="column_id" type="BIGINT" remarks="栏目Id"/>
+            <column name="content" type="LONGTEXT" remarks="文章内容"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

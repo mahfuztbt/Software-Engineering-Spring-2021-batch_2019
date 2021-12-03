@@ -1,0 +1,1 @@
+liquibase --changeLogFile=dbchangelog.xml --url=jdbc:mysql://localhost:3306/boilerplate --username=boilerplate --password=boilerplate generateChangeLog

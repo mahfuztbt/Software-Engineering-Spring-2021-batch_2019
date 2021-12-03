@@ -1,0 +1,304 @@
+package com.mitonal.edu.common.utils.resolver;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.core.MethodParameter;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * MultiRequestBody解析器 解决的问题： 1、单个字符串等包装类型都要写一个对象才可以用@RequestBody接收；
+ * 2、多个对象需要封装到一个对象里才可以用@RequestBody接收。 主要优势： 1、支持通过注解的value指定JSON的key来解析对象。
+ * 2、支持通过注解无value，直接根据参数名来解析对象 3、支持基本类型的注入
+ * 3、支持多余属性(不解析、不报错)、支持参数“共用”（不指定value时，参数名不为JSON串的key, 整个json串可以被多次解析匹配不同的对象）
+ * 4、支持通过注解无value且参数名不匹配JSON串key时，根据使用整个json串来解析对象。
+ * 6、支持当value和参数名找不到匹配的key时，对象是否用整个json串来进行匹配。
+ */
+public class MultiRequestBodyArgumentResolver implements HandlerMethodArgumentResolver {
+
+	private static final String JSONBODY_ATTRIBUTE = "JSON_REQUEST_BODY";
+
+	private static ObjectMapper objectMapper = new ObjectMapper();
+
+	static {
+		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	}
+
+	public static String readerToString(final Reader input) throws IOException {
+		try (final Writer sw = new StringWriter()) {
+			copyLarge(input, sw, new char[1024 * 4]);
+			return sw.toString();
+		}
+	}
+
+	private static long copyLarge(final Reader input, final Writer output, final char[] buffer) throws IOException {
+		long count = 0;
+		int n;
+		while (-1 != (n = input.read(buffer))) {
+			output.write(buffer, 0, n);
+			count += n;
+		}
+		return count;
+	}
+
+	/**
+	 * 设置支持的方法参数类型
+	 * @param parameter 方法参数
+	 * @return 支持的类型
+	 */
+	@Override
+	public boolean supportsParameter(MethodParameter parameter) {
+		// 支持带@MultiRequestBody注解的参数
+		return parameter.hasParameterAnnotation(MultiRequestBody.class);
+	}
+
+	@Override
+	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+
+		String jsonBody = getRequestBody(webRequest);
+		Map<String, Object> jsonObject = objectMapper.readValue(jsonBody, Map.class);
+
+		// 根据@MultiRequestBody注解value作为json解析的key
+		MultiRequestBody parameterAnnotation = parameter.getParameterAnnotation(MultiRequestBody.class);
+		// 注解的value是JSON的key
+		String key = parameterAnnotation.value();
+		Object value;
+		// 如果@MultiRequestBody注解没有设置value，则取参数名FrameworkServlet作为json解析的key
+		if (!StringUtils.isEmpty(key)) {
+			value = jsonObject.get(key);
+			// 如果设置了value但是解析不到，报错
+			if (value == null && parameterAnnotation.required()) {
+				throw new IllegalArgumentException(String.format("required param %s is not present", key));
+			}
+		}
+		else {
+			// 注解为设置value则用参数名当做json的key
+			key = parameter.getParameterName();
+			value = jsonObject.get(key);
+		}
+
+		// 获取的注解后的类型 Long
+		Class<?> parameterType = parameter.getParameterType();
+		// 通过注解的value或者参数名解析，能拿到value进行解析
+		if (value != null) {
+			// 基本类型
+			if (parameterType.isPrimitive()) {
+				return parsePrimitive(parameterType.getName(), value);
+			}
+			// 基本类型包装类
+			if (isBasicDataTypes(parameterType)) {
+				return parseBasicTypeWrapper(parameterType, value);
+				// 字符串类型
+			}
+			else if (parameterType == String.class) {
+				return value.toString();
+			}
+			// 其他复杂对象
+			return objectMapper.readValue(objectMapper.writeValueAsString(value), parameterType);
+		}
+
+		// 解析不到则将整个json串解析为当前参数类型
+		if (isBasicDataTypes(parameterType)) {
+			if (parameterAnnotation.required()) {
+				throw new IllegalArgumentException(String.format("required param %s is not present", key));
+			}
+			else {
+				return null;
+			}
+		}
+
+		// 非基本类型，不允许解析所有字段，必备参数则报错，非必备参数则返回null
+		if (!parameterAnnotation.parseAllFields()) {
+			// 如果是必传参数抛异常
+			if (parameterAnnotation.required()) {
+				throw new IllegalArgumentException(String.format("required param %s is not present", key));
+			}
+			// 否则返回null
+			return null;
+		}
+
+		// 非基本类型，允许解析，将外层属性解析
+		Object result;
+		try {
+			result = objectMapper.readValue(objectMapper.writeValueAsString(jsonBody), parameterType);
+		}
+		catch (JsonParseException | JsonMappingException ex) {
+			result = null;
+		}
+
+		// 如果非必要参数直接返回，否则如果没有一个属性有值则报错
+		if (!parameterAnnotation.required()) {
+			return result;
+		}
+		if (result == null) {
+			throw new IllegalArgumentException(String.format("required param %s is not present", key));
+		}
+		boolean haveValue = false;
+		Field[] declaredFields = parameterType.getDeclaredFields();
+		for (Field field : declaredFields) {
+			field.setAccessible(true);
+			if (field.get(result) != null) {
+				haveValue = true;
+				break;
+			}
+		}
+		if (!haveValue) {
+			throw new IllegalArgumentException(String.format("required param %s is not present", key));
+		}
+		return result;
+
+	}
+
+	/**
+	 * 基本类型解析
+	 */
+	private Object parsePrimitive(String parameterTypeName, Object value) {
+		final String booleanTypeName = "boolean";
+		if (booleanTypeName.equals(parameterTypeName)) {
+			return parseBoolean(value, false);
+		}
+		final String intTypeName = "int";
+		if (intTypeName.equals(parameterTypeName)) {
+			return Integer.valueOf(value.toString());
+		}
+		final String charTypeName = "char";
+		if (charTypeName.equals(parameterTypeName)) {
+			return value.toString().charAt(0);
+		}
+		final String shortTypeName = "short";
+		if (shortTypeName.equals(parameterTypeName)) {
+			return Short.valueOf(value.toString());
+		}
+		final String longTypeName = "long";
+		if (longTypeName.equals(parameterTypeName)) {
+			return Long.valueOf(value.toString());
+		}
+		final String floatTypeName = "float";
+		if (floatTypeName.equals(parameterTypeName)) {
+			return Float.valueOf(value.toString());
+		}
+		final String doubleTypeName = "double";
+		if (doubleTypeName.equals(parameterTypeName)) {
+			return Double.valueOf(value.toString());
+		}
+		final String byteTypeName = "byte";
+		if (byteTypeName.equals(parameterTypeName)) {
+			return Byte.valueOf(value.toString());
+		}
+		return null;
+	}
+
+	/**
+	 * 基本类型包装类解析
+	 */
+	private Object parseBasicTypeWrapper(Class<?> parameterType, Object value) {
+		if (Number.class.isAssignableFrom(parameterType)) {
+			Number number = (Number) value;
+			if (parameterType == Integer.class) {
+				return number.intValue();
+			}
+			else if (parameterType == Short.class) {
+				return number.shortValue();
+			}
+			else if (parameterType == Long.class) {
+				return number.longValue();
+			}
+			else if (parameterType == Float.class) {
+				return number.floatValue();
+			}
+			else if (parameterType == Double.class) {
+				return number.doubleValue();
+			}
+			else if (parameterType == Byte.class) {
+				return number.byteValue();
+			}
+		}
+		else if (parameterType == Boolean.class) {
+			return parseBoolean(value, null);
+		}
+		else if (parameterType == Character.class) {
+			return value.toString().charAt(0);
+		}
+		return null;
+	}
+
+	private Boolean parseBoolean(Object value, Boolean defaultValue) {
+		final String valueStr = value.toString();
+		if (StringUtils.isEmpty(valueStr)) {
+			return defaultValue;
+		}
+		final String trueStr = "true";
+		if (trueStr.equalsIgnoreCase(valueStr)) {
+			return true;
+		}
+		final String falseStr = "false";
+		if (falseStr.equalsIgnoreCase(valueStr)) {
+			return false;
+		}
+		final String zeroStr = "0";
+		if (zeroStr.equalsIgnoreCase(valueStr)) {
+			return false;
+		}
+		try {
+			Number number = (Number) value;
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
+	/**
+	 * 判断是否为基本数据类型包装类
+	 */
+	private boolean isBasicDataTypes(Class clazz) {
+		Set<Class> classSet = new HashSet<>();
+		classSet.add(Integer.class);
+		classSet.add(Long.class);
+		classSet.add(Short.class);
+		classSet.add(Float.class);
+		classSet.add(Double.class);
+		classSet.add(Boolean.class);
+		classSet.add(Byte.class);
+		classSet.add(Character.class);
+		return classSet.contains(clazz);
+	}
+
+	/**
+	 * 获取请求体JSON字符串
+	 */
+	private String getRequestBody(NativeWebRequest webRequest) {
+		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
+
+		// 有就直接获取
+		String jsonBody = (String) webRequest.getAttribute(JSONBODY_ATTRIBUTE, NativeWebRequest.SCOPE_REQUEST);
+		// 没有就从请求中读取
+		if (jsonBody == null) {
+			try {
+				jsonBody = readerToString(servletRequest.getReader());
+				webRequest.setAttribute(JSONBODY_ATTRIBUTE, jsonBody, NativeWebRequest.SCOPE_REQUEST);
+			}
+			catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return jsonBody;
+	}
+
+}

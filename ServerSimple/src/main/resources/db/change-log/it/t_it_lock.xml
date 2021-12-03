@@ -1,0 +1,15 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet author="mitong" id="202105161135-create-lock-table">
+        <createTable tableName="t_it_lock">
+            <column name="lock_key" type="VARCHAR(36)">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="client_id" type="VARCHAR(36)"/>
+            <column name="created_date" type="datetime"/>
+            <column name="region" type="VARCHAR(100)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

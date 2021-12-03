@@ -1,0 +1,18 @@
+spring:
+  # 数据库
+  datasource:
+    #eduaction:
+    url: jdbc:sqlserver://139.186.71.48;databaseName=EduactionBase
+    username: finUser
+    password: 1q2w3e4rfinUser
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    sql-script-encoding: utf-8
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServer2008Dialect
+    show-sql: true
+
+    #finance:
+#    url: jdbc:sqlserver://139.186.71.48;databaseName=FinanceSystem
+#    username: finUser
+#    password: 1q2w3e4rfinUser
+#    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver

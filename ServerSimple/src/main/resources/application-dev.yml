@@ -1,0 +1,18 @@
+spring:
+  cache:
+    type: simple
+    #redis
+  # 开发支持
+  devtools:
+    add-properties: true
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
