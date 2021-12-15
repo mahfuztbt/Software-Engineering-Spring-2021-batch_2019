@@ -13,36 +13,7 @@
     <artifactId>app-serverBase</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>appBase</name>
-    <description>java通用后台</description>
-
-    <!--  pom注册-->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>alimaven</id>
-            <name>aliyun maven</name>
-            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>central-snapshots</id>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>spring-plugins-release</id>
-            <url>https://maven.aliyun.com/repository/spring-plugin</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <description>for class use</description>
     <repositories>
         <repository>
             <id>alimaven</id>
@@ -105,13 +76,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework</groupId>-->
-        <!--            <artifactId>spring-webmvc</artifactId>-->
-        <!--            <version>5.2.6.RELEASE</version>-->
-        <!--        </dependency>-->
-        <!--        -->
-        <!-- 安全相关 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -121,14 +85,6 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--不再使用-->
-        <!--
-             <dependency>
-                 <groupId>javax.validation</groupId>
-                 <artifactId>validation-api</artifactId>
-                 <version>2.0.1.Final</version>
-             </dependency>-->
-        <!--jwt-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -151,11 +107,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>de.codecentric</groupId>-->
-        <!--            <artifactId>spring-boot-admin-starter-server</artifactId>-->
-        <!--            <version>${spring.boot.admin.version}</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>de.codecentric</groupId>
             <artifactId>spring-boot-admin-starter-client</artifactId>
@@ -192,32 +143,6 @@
             <artifactId>liquibase-core</artifactId>
             <version>4.3.5</version>
         </dependency>
-        <!--
-  <dependency>
-      <groupId>org.mybatis.spring.boot</groupId>
-      <artifactId>mybatis-spring-boot-starter</artifactId>
-      <version>${mybatis.starter.version}</version>
-  </dependency>-->
-
-        <!--  数据库监控  -->
-        <!--
-<dependency>
-    <groupId>com.github.gavlyukovskiy</groupId>
-    <artifactId>p6spy-spring-boot-starter</artifactId>
-    <version>${p6spy.starter.version}</version>
-    <exclusions>
-        <exclusion>
-            <groupId>p6spy</groupId>
-            <artifactId>p6spy</artifactId>
-        </exclusion>
-    </exclusions>
-</dependency>
-<dependency>
-    <groupId>p6spy</groupId>
-    <artifactId>p6spy</artifactId>
-    <version>${p6spy.version}</version>
-</dependency>
--->
 
         <!--分页支持-->
         <dependency>
@@ -225,23 +150,6 @@
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>${pagehelper.version}</version>
         </dependency>
-        <!--不需要明确引入jackson-->
-        <!--
-         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind.version}</version>
-        </dependency>
-        -->
-
-        <!--
-           <dependency>
-               <groupId>com.google.code.gson</groupId>
-               <artifactId>gson</artifactId>
-               <version>${gson.version}</version>
-               <scope>compile</scope>
-           </dependency>
-   -->
 
         <!--集成服务-->
         <dependency>
@@ -317,9 +225,6 @@
             <version>${knife4j.version}</version>
         </dependency>
 
-
-
-        <!-- poi word-->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -345,26 +250,6 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>io.spring.javaformat</groupId>
-                <artifactId>spring-javaformat-maven-plugin</artifactId>
-                <version>0.0.27</version>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <inherited>true</inherited>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 
 </project>
